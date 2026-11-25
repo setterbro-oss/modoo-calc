@@ -1,0 +1,96 @@
+---
+import "../styles/global.css";
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="가격과 할인율을 입력해 할인 금액과 최종 가격을 계산하세요." />
+    <title>할인 가격 계산기 | 모두의 계산기</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="모두의 계산기 홈">모두의 계산기</a>
+      <span class="tag">베타</span>
+    </header>
+    <main>
+      <section class="intro">
+        <p class="eyebrow">무료 계산 도구</p>
+        <h1>할인 가격 계산기</h1>
+        <p>상품 가격과 할인율을 입력하면 할인 금액과 결제할 금액을 계산합니다.</p>
+      </section>
+
+      <section class="calculator" aria-labelledby="calculator-title">
+        <h2 id="calculator-title">할인 금액 계산</h2>
+        <form id="discount-form">
+          <label for="price">상품 가격 (원)</label>
+          <input id="price" name="price" type="number" min="0" max="1000000000000" step="1" value="50000" required />
+
+          <label for="rate">할인율 (%)</label>
+          <input id="rate" name="rate" type="number" min="0" max="100" step="0.1" value="20" required />
+
+          <button type="submit">계산하기</button>
+        </form>
+
+        <div id="result" class="result" aria-live="polite">
+          <p>할인 금액 <strong id="discount-amount">10,000원</strong></p>
+          <p>최종 가격 <strong id="final-price">40,000원</strong></p>
+        </div>
+        <p id="error" class="error" role="alert" hidden></p>
+      </section>
+
+      <section class="explanation">
+        <h2>계산 방법</h2>
+        <p>할인 금액은 상품 가격에 할인율을 곱해 계산합니다. 최종 가격은 상품 가격에서 할인 금액을 뺀 값이며, 원 단위로 반올림합니다.</p>
+        <p class="formula">할인 금액 = 상품 가격 × 할인율 ÷ 100</p>
+        <p class="formula">최종 가격 = 상품 가격 − 할인 금액</p>
+      </section>
+
+      <section class="notice">
+        <h2>계산 시 참고사항</h2>
+        <ul>
+          <li>입력 가격은 0원 이상이어야 합니다.</li>
+          <li>할인율은 0%부터 100%까지 입력할 수 있습니다.</li>
+          <li>실제 결제 금액은 판매처의 추가 할인, 배송비, 세금 처리에 따라 달라질 수 있습니다.</li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <p>모두의 계산기 · 계산 결과는 입력값을 기준으로 제공됩니다.</p>
+      <p><a href="/privacy/">개인정보처리방침</a> · <a href="/about/">사이트 안내</a></p>
+    </footer>
+
+    <script>
+      const form = document.querySelector("#discount-form");
+      const priceInput = document.querySelector("#price");
+      const rateInput = document.querySelector("#rate");
+      const discountOutput = document.querySelector("#discount-amount");
+      const finalOutput = document.querySelector("#final-price");
+      const errorOutput = document.querySelector("#error");
+      const formatWon = (value) => new Intl.NumberFormat("ko-KR", {
+        maximumFractionDigits: 0
+      }).format(value) + "원";
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const price = Number(priceInput.value);
+        const rate = Number(rateInput.value);
+
+        if (priceInput.value.trim() === "" || rateInput.value.trim() === "" ||
+            !Number.isFinite(price) || !Number.isFinite(rate) ||
+            price < 0 || rate < 0 || rate > 100) {
+          errorOutput.textContent = "가격은 0 이상, 할인율은 0~100 사이로 입력해 주세요.";
+          errorOutput.hidden = false;
+          return;
+        }
+
+        const roundedPrice = Math.round(price);
+        const finalPrice = Math.round(roundedPrice * (1 - rate / 100));
+        discountOutput.textContent = formatWon(roundedPrice - finalPrice);
+        finalOutput.textContent = formatWon(finalPrice);
+        errorOutput.hidden = true;
+      });
+    </script>
+  </body>
+</html>
